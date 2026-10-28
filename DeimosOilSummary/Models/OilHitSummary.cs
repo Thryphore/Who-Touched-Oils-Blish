@@ -9,7 +9,7 @@ namespace DeimosOilSummary.Models {
             bool hasAccount   = !string.IsNullOrWhiteSpace(accountName);
 
             if (hasCharacter && hasAccount) {
-                return $"{characterName} \"{accountName}\"";
+                return $"{characterName} ({accountName})";
             }
 
             if (hasCharacter) {
@@ -17,7 +17,7 @@ namespace DeimosOilSummary.Models {
             }
 
             if (hasAccount) {
-                return $"\"{accountName}\"";
+                return $"({accountName})";
             }
 
             return "Unknown";
