@@ -5,7 +5,6 @@ using Blish_HUD.Controls;
 using Blish_HUD.Input;
 using DeimosOilSummary.Models;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace DeimosOilSummary.Controls {
@@ -23,10 +22,10 @@ namespace DeimosOilSummary.Controls {
         private readonly Label          _bodyLabel;
         private readonly StandardButton _latestButton;
         private readonly StandardButton _dismissButton;
+        private readonly Panel          _dragHandle;
 
         private bool  _dragging;
-        private Point _dragMouseStart;
-        private Point _dragPanelStart;
+        private Point _dragStart = Point.Zero;
 
         public event EventHandler ParseLatestClicked;
 
@@ -36,6 +35,26 @@ namespace DeimosOilSummary.Controls {
             ShowBorder      = true;
             BackgroundColor = Color.Black * 0.6f;
             Title           = "Who Touched Oils";
+
+            // Children are laid out in ContentRegion (below the title).
+            // A handle at Y = -HEADER_HEIGHT sits on the title bar and receives mouse input.
+            _dragHandle = new Panel {
+                Parent          = this,
+                Location        = new Point(0, -HEADER_HEIGHT),
+                Size            = new Point(PanelWidth, HEADER_HEIGHT),
+                BackgroundColor = Color.Transparent,
+                ZIndex          = 100,
+                BasicTooltipText = "Drag to move"
+            };
+
+            _dragHandle.LeftMouseButtonPressed += (s, e) => {
+                _dragging  = true;
+                _dragStart = Input.Mouse.Position;
+            };
+
+            _dragHandle.LeftMouseButtonReleased += (s, e) => {
+                _dragging = false;
+            };
 
             _statusLabel = new Label {
                 Text           = "Waiting for a Deimos log…",
@@ -48,7 +67,6 @@ namespace DeimosOilSummary.Controls {
                 Parent         = this
             };
 
-            // Scrollable middle so long summaries never cover the buttons.
             _bodyHost = new Panel {
                 ShowBorder      = false,
                 CanScroll       = true,
@@ -88,30 +106,15 @@ namespace DeimosOilSummary.Controls {
             LayoutChildren();
         }
 
-        protected override void OnLeftMouseButtonPressed(MouseEventArgs e) {
-            // Drag from the title bar (Panel.HEADER_HEIGHT).
-            if (RelativeMousePosition.Y >= 0 && RelativeMousePosition.Y <= HEADER_HEIGHT) {
-                _dragging       = true;
-                _dragMouseStart = GameService.Input.Mouse.Position;
-                _dragPanelStart = Location;
-            }
-
-            base.OnLeftMouseButtonPressed(e);
-        }
-
-        protected override void OnLeftMouseButtonReleased(MouseEventArgs e) {
-            _dragging = false;
-            base.OnLeftMouseButtonReleased(e);
-        }
-
         public override void UpdateContainer(GameTime gameTime) {
             if (_dragging) {
-                // Stop if the button was released outside the panel.
-                if (GameService.Input.Mouse.State.LeftButton != ButtonState.Pressed) {
+                if (Input.Mouse.State.LeftButton != Microsoft.Xna.Framework.Input.ButtonState.Pressed) {
                     _dragging = false;
                 } else {
-                    Point delta = GameService.Input.Mouse.Position - _dragMouseStart;
-                    Location = _dragPanelStart + delta;
+                    // Incremental move (same pattern as other Blish modules).
+                    Point nOffset = Input.Mouse.Position - _dragStart;
+                    Location += nOffset;
+                    _dragStart = Input.Mouse.Position;
                 }
             }
 
@@ -182,9 +185,11 @@ namespace DeimosOilSummary.Controls {
         }
 
         private void LayoutChildren() {
-            // Child locations are relative to ContentRegion (below the title bar).
             int contentW = Math.Max(100, ContentRegion.Width);
             int contentH = Math.Max(120, ContentRegion.Height);
+
+            _dragHandle.Location = new Point(0, -HEADER_HEIGHT);
+            _dragHandle.Size     = new Point(contentW + ContentRegion.X, HEADER_HEIGHT);
 
             _statusLabel.Width = contentW - 20;
 
