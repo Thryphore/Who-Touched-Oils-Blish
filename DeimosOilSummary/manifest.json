@@ -1,6 +1,6 @@
 {
   "name": "Who Touched Oils",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "namespace": "gw2.deimosoilsummary",
   "package": "DeimosOilSummary.dll",
   "manifest_version": 1,

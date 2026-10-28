@@ -73,7 +73,7 @@ namespace DeimosOilSummary.Controls {
             };
 
             _bodyLabel = new Label {
-                Text           = "After a Deimos pull, oil hits are listed here\n(from ArcDPS logs — no bridge needed).",
+                Text           = "After a Deimos pull, oil hits are listed here.",
                 Font           = GameService.Content.DefaultFont14,
                 TextColor      = Color.White,
                 ShowShadow     = true,
