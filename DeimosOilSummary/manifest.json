@@ -1,6 +1,6 @@
 {
-  "name": "Deimos Oil Summary",
-  "version": "1.2.0",
+  "name": "Who Touched Oils",
+  "version": "1.2.1",
   "namespace": "gw2.deimosoilsummary",
   "package": "DeimosOilSummary.dll",
   "manifest_version": 1,
@@ -9,7 +9,7 @@
   "dependencies": {
     "bh.blishhud": ">=1.2.0"
   },
-  "url": "https://github.com/",
+  "url": "https://thryphore.github.io/Who-Touched-Oils/",
   "contributors": [
     {
       "name": "awitt"

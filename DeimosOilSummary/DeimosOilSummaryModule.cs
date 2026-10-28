@@ -5,6 +5,7 @@ using Blish_HUD;
 using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Modules;
+using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
 using DeimosOilSummary.Controls;
 using DeimosOilSummary.Models;
@@ -65,8 +66,8 @@ namespace DeimosOilSummary {
             _panel.ParseLatestClicked += OnParseLatestClicked;
 
             _cornerIcon = new CornerIcon {
-                Icon             = AsyncTexture2D.FromAssetId(155150),
-                BasicTooltipText = "Deimos Oil Summary",
+                Icon             = ModuleParameters.ContentsManager.GetTexture(@"who-touched-oils-icon.png"),
+                BasicTooltipText = "Who Touched Oils",
                 Priority         = 1847291054,
                 Parent           = GameService.Graphics.SpriteScreen
             };
