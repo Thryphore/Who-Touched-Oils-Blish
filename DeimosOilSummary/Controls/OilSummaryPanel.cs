@@ -2,8 +2,10 @@ using System;
 using System.Text;
 using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Input;
 using DeimosOilSummary.Models;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace DeimosOilSummary.Controls {
@@ -22,6 +24,10 @@ namespace DeimosOilSummary.Controls {
         private readonly StandardButton _latestButton;
         private readonly StandardButton _dismissButton;
 
+        private bool  _dragging;
+        private Point _dragMouseStart;
+        private Point _dragPanelStart;
+
         public event EventHandler ParseLatestClicked;
 
         public OilSummaryPanel() {
@@ -29,7 +35,7 @@ namespace DeimosOilSummary.Controls {
             Height          = PanelHeight;
             ShowBorder      = true;
             BackgroundColor = Color.Black * 0.6f;
-            Title           = "Deimos Oil Summary";
+            Title           = "Who Touched Oils";
 
             _statusLabel = new Label {
                 Text           = "Waiting for a Deimos log…",
@@ -80,6 +86,36 @@ namespace DeimosOilSummary.Controls {
 
             Resized += (s, e) => LayoutChildren();
             LayoutChildren();
+        }
+
+        protected override void OnLeftMouseButtonPressed(MouseEventArgs e) {
+            // Drag from the title bar (Panel.HEADER_HEIGHT).
+            if (RelativeMousePosition.Y >= 0 && RelativeMousePosition.Y <= HEADER_HEIGHT) {
+                _dragging       = true;
+                _dragMouseStart = GameService.Input.Mouse.Position;
+                _dragPanelStart = Location;
+            }
+
+            base.OnLeftMouseButtonPressed(e);
+        }
+
+        protected override void OnLeftMouseButtonReleased(MouseEventArgs e) {
+            _dragging = false;
+            base.OnLeftMouseButtonReleased(e);
+        }
+
+        public override void UpdateContainer(GameTime gameTime) {
+            if (_dragging) {
+                // Stop if the button was released outside the panel.
+                if (GameService.Input.Mouse.State.LeftButton != ButtonState.Pressed) {
+                    _dragging = false;
+                } else {
+                    Point delta = GameService.Input.Mouse.Position - _dragMouseStart;
+                    Location = _dragPanelStart + delta;
+                }
+            }
+
+            base.UpdateContainer(gameTime);
         }
 
         public void SetStatus(string status) {
@@ -147,7 +183,6 @@ namespace DeimosOilSummary.Controls {
 
         private void LayoutChildren() {
             // Child locations are relative to ContentRegion (below the title bar).
-            // Using outer Height for button Y was clipping them under the chrome.
             int contentW = Math.Max(100, ContentRegion.Width);
             int contentH = Math.Max(120, ContentRegion.Height);
 
@@ -158,7 +193,6 @@ namespace DeimosOilSummary.Controls {
             _bodyHost.Size     = new Point(contentW - 12, Math.Max(60, bodyBottom - BodyTop));
 
             _bodyLabel.Width = Math.Max(80, _bodyHost.ContentRegion.Width - 16);
-            // Force height from wrapped text so the host can scroll.
             _bodyLabel.RecalculateLayout();
 
             int buttonY = contentH - 34;
