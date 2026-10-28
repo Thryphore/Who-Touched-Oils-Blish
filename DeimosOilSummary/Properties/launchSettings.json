@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "gw2": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Guild Wars 2\\addons\\Blish HUD\\Blish HUD.exe",
+      "commandLineArgs": "--debug --module \"$(ProjectDir)$(BaseOutputPath)$(Configuration)\\$(TargetFramework)\\$(TargetName).bhm\" --settings \"$(ProjectDir)..\\Settings_$(TargetName)\""
+    }
+  }
+}

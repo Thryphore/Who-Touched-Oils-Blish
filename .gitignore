@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/.vs/
+**/Settings_*/
+*.user
+*.suo
+.DS_Store
+Thumbs.db

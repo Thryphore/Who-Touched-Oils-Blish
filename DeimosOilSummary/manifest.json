@@ -1,0 +1,21 @@
+{
+  "name": "Deimos Oil Summary",
+  "version": "1.2.0",
+  "namespace": "gw2.deimosoilsummary",
+  "package": "DeimosOilSummary.dll",
+  "manifest_version": 1,
+
+  "description": "After a Deimos pull, shows who stepped in Rapid Decay (oils) and how many times from ArcDPS combat logs. No ArcDPS Blish bridge required.",
+  "dependencies": {
+    "bh.blishhud": ">=1.2.0"
+  },
+  "url": "https://github.com/",
+  "contributors": [
+    {
+      "name": "awitt"
+    }
+  ],
+
+  "directories": [ "deimos-oil-summary" ],
+  "enabled_without_gw2": false
+}
