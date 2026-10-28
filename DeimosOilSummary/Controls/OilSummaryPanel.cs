@@ -22,6 +22,7 @@ namespace DeimosOilSummary.Controls {
         private readonly Label          _bodyLabel;
         private readonly StandardButton _latestButton;
         private readonly StandardButton _dismissButton;
+        private readonly Control        _dragHandle;
 
         private bool  _dragging;
         private Point _dragStart = Point.Zero;
@@ -35,8 +36,22 @@ namespace DeimosOilSummary.Controls {
             BackgroundColor = Color.Black * 0.6f;
             Title           = "Who Touched Oils";
 
-            // Same pattern as WindowBase2: drag while held, stop on global mouse-up
-            // (release may happen outside this control).
+            // Invisible hit target over the painted title bar. Panel title clicks
+            // often fall through; a child at Y = -HEADER_HEIGHT sits on the header.
+            // Drag must use a global mouse-up (WindowBase2 pattern) so releasing
+            // outside the handle does not strand / cancel the drag.
+            _dragHandle = new DragHandle {
+                Parent   = this,
+                Location = new Point(0, -HEADER_HEIGHT),
+                Size     = new Point(PanelWidth, HEADER_HEIGHT),
+                ZIndex   = int.MaxValue / 4
+            };
+
+            _dragHandle.LeftMouseButtonPressed += (s, e) => {
+                _dragging  = true;
+                _dragStart = Input.Mouse.Position;
+            };
+
             GameService.Input.Mouse.LeftMouseButtonReleased += OnGlobalMouseRelease;
 
             _statusLabel = new Label {
@@ -87,16 +102,6 @@ namespace DeimosOilSummary.Controls {
 
             Resized += (s, e) => LayoutChildren();
             LayoutChildren();
-        }
-
-        protected override void OnLeftMouseButtonPressed(MouseEventArgs e) {
-            // Title bar is drawn above ContentRegion; children live below it.
-            if (RelativeMousePosition.Y >= 0 && RelativeMousePosition.Y < HEADER_HEIGHT) {
-                _dragging  = true;
-                _dragStart = Input.Mouse.Position;
-            }
-
-            base.OnLeftMouseButtonPressed(e);
         }
 
         public override void UpdateContainer(GameTime gameTime) {
@@ -180,6 +185,10 @@ namespace DeimosOilSummary.Controls {
             int contentW = Math.Max(100, ContentRegion.Width);
             int contentH = Math.Max(120, ContentRegion.Height);
 
+            _dragHandle.Location = new Point(0, -HEADER_HEIGHT);
+            _dragHandle.Width    = Math.Max(PanelWidth, contentW + ContentRegion.X);
+            _dragHandle.Height   = HEADER_HEIGHT;
+
             _statusLabel.Width = contentW - 20;
 
             int bodyBottom = contentH - FooterHeight;
@@ -197,6 +206,22 @@ namespace DeimosOilSummary.Controls {
         protected override void DisposeControl() {
             GameService.Input.Mouse.LeftMouseButtonReleased -= OnGlobalMouseRelease;
             base.DisposeControl();
+        }
+
+        /// <summary>
+        /// Empty control that still captures mouse (unlike a zero-op draw with no hit target).
+        /// ClipsBounds=false so it remains hittable outside the panel ContentRegion scissor.
+        /// </summary>
+        private sealed class DragHandle : Control {
+            public DragHandle() {
+                ClipsBounds = false;
+            }
+
+            protected override CaptureType CapturesInput() => CaptureType.Mouse;
+
+            protected override void Paint(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Rectangle bounds) {
+                // Intentionally empty — hit target only.
+            }
         }
 
     }
