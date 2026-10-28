@@ -3,24 +3,33 @@ using System.Collections.Generic;
 
 namespace DeimosOilSummary.Models {
 
+    internal static class OilNameFormat {
+        public static string Display(string characterName, string accountName) {
+            bool hasCharacter = !string.IsNullOrWhiteSpace(characterName);
+            bool hasAccount   = !string.IsNullOrWhiteSpace(accountName);
+
+            if (hasCharacter && hasAccount) {
+                return $"{characterName} \"{accountName}\"";
+            }
+
+            if (hasCharacter) {
+                return characterName;
+            }
+
+            if (hasAccount) {
+                return $"\"{accountName}\"";
+            }
+
+            return "Unknown";
+        }
+    }
+
     public sealed class PlayerOilCount {
         public string CharacterName { get; set; }
         public string AccountName   { get; set; }
         public int    HitCount      { get; set; }
 
-        public string DisplayName {
-            get {
-                if (!string.IsNullOrWhiteSpace(CharacterName)) {
-                    return CharacterName;
-                }
-
-                if (!string.IsNullOrWhiteSpace(AccountName)) {
-                    return AccountName;
-                }
-
-                return "Unknown";
-            }
-        }
+        public string DisplayName => OilNameFormat.Display(CharacterName, AccountName);
     }
 
     public sealed class OilFirstTouch {
@@ -29,19 +38,7 @@ namespace DeimosOilSummary.Models {
         public string AccountName   { get; set; }
         public long   TimeMs        { get; set; }
 
-        public string DisplayName {
-            get {
-                if (!string.IsNullOrWhiteSpace(CharacterName)) {
-                    return CharacterName;
-                }
-
-                if (!string.IsNullOrWhiteSpace(AccountName)) {
-                    return AccountName;
-                }
-
-                return "Unknown";
-            }
-        }
+        public string DisplayName => OilNameFormat.Display(CharacterName, AccountName);
     }
 
     public sealed class OilHitSummary {
