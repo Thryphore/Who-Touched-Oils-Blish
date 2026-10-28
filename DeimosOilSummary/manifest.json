@@ -1,6 +1,6 @@
 {
   "name": "Who Touched Oils",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "namespace": "gw2.deimosoilsummary",
   "package": "DeimosOilSummary.dll",
   "manifest_version": 1,
@@ -12,7 +12,7 @@
   "url": "https://thryphore.github.io/Who-Touched-Oils/",
   "contributors": [
     {
-      "name": "awitt"
+      "name": "navi.5047"
     }
   ],
 
