@@ -22,7 +22,6 @@ namespace DeimosOilSummary.Controls {
         private readonly Label          _bodyLabel;
         private readonly StandardButton _latestButton;
         private readonly StandardButton _dismissButton;
-        private readonly Panel          _dragHandle;
 
         private bool  _dragging;
         private Point _dragStart = Point.Zero;
@@ -36,25 +35,9 @@ namespace DeimosOilSummary.Controls {
             BackgroundColor = Color.Black * 0.6f;
             Title           = "Who Touched Oils";
 
-            // Children are laid out in ContentRegion (below the title).
-            // A handle at Y = -HEADER_HEIGHT sits on the title bar and receives mouse input.
-            _dragHandle = new Panel {
-                Parent          = this,
-                Location        = new Point(0, -HEADER_HEIGHT),
-                Size            = new Point(PanelWidth, HEADER_HEIGHT),
-                BackgroundColor = Color.Transparent,
-                ZIndex          = 100,
-                BasicTooltipText = "Drag to move"
-            };
-
-            _dragHandle.LeftMouseButtonPressed += (s, e) => {
-                _dragging  = true;
-                _dragStart = Input.Mouse.Position;
-            };
-
-            _dragHandle.LeftMouseButtonReleased += (s, e) => {
-                _dragging = false;
-            };
+            // Same pattern as WindowBase2: drag while held, stop on global mouse-up
+            // (release may happen outside this control).
+            GameService.Input.Mouse.LeftMouseButtonReleased += OnGlobalMouseRelease;
 
             _statusLabel = new Label {
                 Text           = "Waiting for a Deimos log…",
@@ -106,19 +89,28 @@ namespace DeimosOilSummary.Controls {
             LayoutChildren();
         }
 
+        protected override void OnLeftMouseButtonPressed(MouseEventArgs e) {
+            // Title bar is drawn above ContentRegion; children live below it.
+            if (RelativeMousePosition.Y >= 0 && RelativeMousePosition.Y < HEADER_HEIGHT) {
+                _dragging  = true;
+                _dragStart = Input.Mouse.Position;
+            }
+
+            base.OnLeftMouseButtonPressed(e);
+        }
+
         public override void UpdateContainer(GameTime gameTime) {
             if (_dragging) {
-                if (Input.Mouse.State.LeftButton != Microsoft.Xna.Framework.Input.ButtonState.Pressed) {
-                    _dragging = false;
-                } else {
-                    // Incremental move (same pattern as other Blish modules).
-                    Point nOffset = Input.Mouse.Position - _dragStart;
-                    Location += nOffset;
-                    _dragStart = Input.Mouse.Position;
-                }
+                Point nOffset = Input.Mouse.Position - _dragStart;
+                Location += nOffset;
+                _dragStart = Input.Mouse.Position;
             }
 
             base.UpdateContainer(gameTime);
+        }
+
+        private void OnGlobalMouseRelease(object sender, MouseEventArgs e) {
+            _dragging = false;
         }
 
         public void SetStatus(string status) {
@@ -188,9 +180,6 @@ namespace DeimosOilSummary.Controls {
             int contentW = Math.Max(100, ContentRegion.Width);
             int contentH = Math.Max(120, ContentRegion.Height);
 
-            _dragHandle.Location = new Point(0, -HEADER_HEIGHT);
-            _dragHandle.Size     = new Point(contentW + ContentRegion.X, HEADER_HEIGHT);
-
             _statusLabel.Width = contentW - 20;
 
             int bodyBottom = contentH - FooterHeight;
@@ -203,6 +192,11 @@ namespace DeimosOilSummary.Controls {
             int buttonY = contentH - 34;
             _latestButton.Location  = new Point(10, buttonY);
             _dismissButton.Location = new Point(220, buttonY);
+        }
+
+        protected override void DisposeControl() {
+            GameService.Input.Mouse.LeftMouseButtonReleased -= OnGlobalMouseRelease;
+            base.DisposeControl();
         }
 
     }
